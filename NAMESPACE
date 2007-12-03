@@ -1,0 +1,7 @@
+### C code
+useDynLib(torus, .registration = TRUE)
+
+
+### Exports
+export(torus)
+export(setTorusSeed)
