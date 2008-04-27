@@ -1,21 +1,21 @@
  #############################################################################
- #   Copyright (c) 2008 Christophe Dutang									 #
- #                                                                           #
- #   This program is free software; you can redistribute it and/or modify    #
- #   it under the terms of the GNU General Public License as published by    #
- #   the Free Software Foundation; either version 2 of the License, or       #
- #   (at your option) any later version.                                     #
- #                                                                           #
- #   This program is distributed in the hope that it will be useful,         #
- #   but WITHOUT ANY WARRANTY; without even the implied warranty of          #
- #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #
- #   GNU General Public License for more details.                            #
- #                                                                           #
- #   You should have received a copy of the GNU General Public License       #
- #   along with this program; if not, write to the                           #
- #   Free Software Foundation, Inc.,                                         #
- #   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA                  #
- #                                                                           #
+ #   Copyright (c) 2008 Christophe Dutang                                                                                                  #
+ #                                                                                                                                                                        #
+ #   This program is free software; you can redistribute it and/or modify                                               #
+ #   it under the terms of the GNU General Public License as published by                                         #
+ #   the Free Software Foundation; either version 2 of the License, or                                                   #
+ #   (at your option) any later version.                                                                                                            #
+ #                                                                                                                                                                         #
+ #   This program is distributed in the hope that it will be useful,                                                             #
+ #   but WITHOUT ANY WARRANTY; without even the implied warranty of                                          #
+ #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                 #
+ #   GNU General Public License for more details.                                                                                    #
+ #                                                                                                                                                                         #
+ #   You should have received a copy of the GNU General Public License                                           #
+ #   along with this program; if not, write to the                                                                                           #
+ #   Free Software Foundation, Inc.,                                                                                                              #
+ #   59 Temple Place, Suite 330, Boston, MA 02111-1307, USA                                                             #
+ #                                                                                                                                                                         #
  #############################################################################
 ### Torus algorithm to generate quasi random numbers
 ###
@@ -23,18 +23,70 @@
 ### 
 
 
-torus <- function(n, dim)
+torus <- function(n, dim = 1, prime, mixed = FALSE, alpha = 100, usetime = TRUE)
 {
-	if(length(n) > 1)
-		.Call("doTorus", length(n), dim)
-	else
-		.Call("doTorus", n, dim)	
+        if(n <0 || is.array(n))
+                stop("invalid argument 'n'")
+        if(dim < 0 || length(dim) >1)
+                stop("invalid argument 'dim'")
+        if(!is.logical(usetime))
+                stop("invalid argument 'mixed'")
+        if(!is.numeric(alpha) || alpha <=0)
+                stop("invalid argument 'alpha'")
+        if(!is.logical(mixed))
+                stop("invalid argument 'mixed'")
+    
+        if(missing(prime)) 
+                prime <- NULL
+        else
+        {
+                if(any(prime < 0) || !is.vector(prime))
+                        stop("invalid argument 'prime'")
+
+                dim <- length(prime)
+                prime <- as.integer( prime )
+        }
+    
+        
+        if(length(n) > 1)
+                res <- .Call("doTorus", length(n), dim, prime, mixed, alpha, usetime)
+        else
+                res <- .Call("doTorus", n, dim, prime, mixed, alpha, usetime)	
+        if(dim == 1)
+                as.vector(res)
+        else
+                as.matrix(res)
 }
 
 setTorusSeed <- function(seed)
 	invisible( .Call("doSetTorusSeed", seed) )
 
- 
+congrurand <- function(n, dim = 1, mod = 2^31-1, mult = 16807, incr = 0, echo)
+{
+        if(!is.numeric(n) || any(n <=0))
+                stop("invalid argument 'n'")
+        if(!is.numeric(dim) || length(dim) !=1 || any(dim <= 0))
+                stop("invalid argument 'dim'")
+        if(!is.numeric(mod) || length(mod) !=1)
+                stop("invalid argument 'mod'")
+        if(!is.numeric(mult) || length(mult) != 1 || mult > mod || mult < 0)
+                stop("invalid argument 'mult'")
+        if(!is.numeric(incr) || length(incr) != 1 || incr > mod || incr < 0)
+                stop("invalid argument 'incr'")    
+           
+        if(missing(echo))
+                echo <- FALSE
+    
+        if(length(n) > 1)
+                res <- .Call("doCongruRand", length(n), dim, mod, mult, incr, echo)
+        else
+                res <- .Call("doCongruRand", n, dim, mod, mult, incr, echo)	
+        if(dim == 1)    
+                as.vector(res)
+        else
+                as.matrix(res)
+}
+
  
 testTorus <- function(n, dim)
 {
